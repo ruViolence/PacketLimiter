@@ -5,7 +5,6 @@ import com.comphenix.protocol.events.ListenerOptions;
 import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.injector.server.TemporaryPlayer;
 import org.bukkit.Bukkit;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
@@ -31,7 +30,7 @@ public final class PacketListener extends PacketAdapter implements Listener {
     private final double interval;
 
     public PacketListener(final PacketLimiter plugin, final String kickMessage, final double maxPacketRate, final double interval) {
-        super(plugin, ListenerPriority.LOWEST, getPackets(), ListenerOptions.ASYNC, ListenerOptions.INTERCEPT_INPUT_BUFFER);
+        super(plugin, ListenerPriority.LOWEST, getPackets(), ListenerOptions.ASYNC);
         // we want to listen at the earliest stage so we can reduce the overhead of packets going through other plugins,
         // as well as other plugin logic being executed for cancelled packets
 
@@ -63,12 +62,11 @@ public final class PacketListener extends PacketAdapter implements Listener {
             return;
         }
 
-        final Player player = event.getPlayer();
-
-        if (player instanceof TemporaryPlayer || player == null) {
+        if (event.isPlayerTemporary()) {
             return; // we don't have UUID at this stage
         }
 
+        final Player player = event.getPlayer();
         final UUID targetUniqueId = player.getUniqueId();
         PlayerInfo info = this.playerPacketInfo.get(targetUniqueId);
 
